@@ -31,7 +31,7 @@ Now it's time to create the necessary objects for our private cluster.
 The following steps will be required to link your private cluster to an AWS environment using Transit Gw.
 
 1. Create the Private VPC for the Cluster
-   1.1 Create Private Subnet for the Egress VPC
+   - Create Private Subnet for the Egress VPC
 2. Create Private ROSA cluster
 3. Create the public VPC that will connect the cluster to the internet, we will call it Egress VPC
 4. Allow DNS between vpcs
@@ -46,27 +46,27 @@ $ aws iam create-service-linked-role --aws-service-name "elasticloadbalancing.am
 ```
 
 ```
-export VERSION#4.12.0 \
-       ROSA_CLUSTER_NAME#myprivate-rosa \
-       AWS_DEFAULT_REGION#us-east-1
+export VERSION=4.12.0 \
+       ROSA_CLUSTER_NAME=myprivate-rosa \
+       AWS_DEFAULT_REGION=us-east-1
 
-VPC_ID_1#`aws ec2 create-vpc --cidr-block 10.0.0.0/16 | jq -r .Vpc.VpcId`
+VPC_ID_1=`aws ec2 create-vpc --cidr-block 10.0.0.0/16 | jq -r .Vpc.VpcId`
 
-aws ec2 create-tags --resources $VPC_ID_1 --tags Key#Name,Value#rosa_intranet_vpc
+aws ec2 create-tags --resources $VPC_ID_1 --tags Key=Name,Value=rosa_intranet_vpc
 ```
 
-!(images/1-create-private-vpc-clusterside.png))["VPC Cluster Side"]
+!["VPC Cluster Side"](images/1-create-private-vpc-clusterside.png))
 
 
 
 ## Create a private subnet based on Private VPC - THIS IS THE CLUSTER WILL RESIDE ON IT
 
 ```
-ROSA_PRIVATE_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_1 --cidr-block 10.0.0.0/17 | jq -r .Subnet.SubnetId`
-aws ec2 create-tags --resources $ROSA_PRIVATE_SUBNET --tags Key#Name,Value#intranet-pvt
+ROSA_PRIVATE_SUBNET=`aws ec2 create-subnet --vpc-id $VPC_ID_1 --cidr-block 10.0.0.0/17 | jq -r .Subnet.SubnetId`
+aws ec2 create-tags --resources $ROSA_PRIVATE_SUBNET --tags Key=Name,Value=intranet-pvt
 echo $ROSA_PRIVATE_SUBNET
 ```
-!(images/3-private-subnet-vpc.png)[Cluster Private Subnet]
+![Cluster Private Subnet](images/3-private-subnet-vpc.png)
 
 
 ## Create ROSA cluster - Single Zone
@@ -74,7 +74,7 @@ echo $ROSA_PRIVATE_SUBNET
 Deploy your ROSA private cluster using Red Cloud Console named Openshift Cluster Manager at https://console.redhat.com/openshift or via cli sample below.
 
 ```
-rosa create cluster --private-link --cluster-name#$ROSA_CLUSTER_NAME [--machine-cidr#10.0.0.0/16] --subnet-ids#$ROSA_PRIVATE_SUBNET
+rosa create cluster --private-link --cluster-name=$ROSA_CLUSTER_NAME [--machine-cidr=10.0.0.0/16] --subnet-ids=$ROSA_PRIVATE_SUBNET
 ```
 
 IMPORTANT: ROSA cli sample requires the prerequisites creation described on Red Hat Official Documentation. 
@@ -83,9 +83,9 @@ IMPORTANT: ROSA cli sample requires the prerequisites creation described on Red 
 ## Create Egress VPC
  
 ```
-VPC_ID_2#`aws ec2 create-vpc --cidr-block 172.100.0.0/20 | jq -r .Vpc.VpcId`
+VPC_ID_2=`aws ec2 create-vpc --cidr-block 172.100.0.0/20 | jq -r .Vpc.VpcId`
 echo $VPC_ID_2
-aws ec2 create-tags --resources $VPC_ID_2 --tags Key#Name,Value#egress_vpc
+aws ec2 create-tags --resources $VPC_ID_2 --tags Key=Name,Value=egress_vpc
 ```
 
 !["VPC Customer AWS Subscription"](images/2-create-vpc-customerside.png)
@@ -104,21 +104,21 @@ aws ec2 modify-vpc-attribute --vpc-id $VPC_ID_2 --enable-dns-hostnames
 TIP: In our example we are creating Egress VPC and their subnets, therefore you can skip this tasks if you already have this underlying infrastructure.
 
 ```
-EGRESS_PRIVATE_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172.100.0.0/17 | jq -r .Subnet.SubnetId`
-aws ec2 create-tags --resources $EGRESS_PRIVATE_SUBNET --tags Key#Name,Value#egress-pvt
+EGRESS_PRIVATE_SUBNET=`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172.100.0.0/17 | jq -r .Subnet.SubnetId`
+aws ec2 create-tags --resources $EGRESS_PRIVATE_SUBNET --tags Key=Name,Value=egress-pvt
 echo $EGRESS_PRIVATE_SUBNET
 ```
-!(images/4-private-subnet-Egressvpc.png)[Egress VPC - Private Subnet]
+![Egress VPC - Private Subnet](images/4-private-subnet-Egressvpc.png)
 
 
 ## Public Subnet for Egress VPC
 
 ```
-EGRESS_PUBLIC_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172.100.128.0/17 | jq -r .Subnet.SubnetId`
-aws ec2 create-tags --resources $EGRESS_PUBLIC_SUBNET --tags Key#Name,Value#egress-public
+EGRESS_PUBLIC_SUBNET=`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172.100.128.0/17 | jq -r .Subnet.SubnetId`
+aws ec2 create-tags --resources $EGRESS_PUBLIC_SUBNET --tags Key=Name,Value=egress-public
 echo $EGRESS_PUBLIC_SUBNET
 ```
-!(images/5-public-subnet-Egressvpc.png)[Egress VPC - Public Subnet]
+![Egress VPC - Public Subnet](images/5-public-subnet-Egressvpc.png)
 
 
 
@@ -127,14 +127,10 @@ echo $EGRESS_PUBLIC_SUBNET
 Internet Gateway is the AWS object responsible to create a way to VPC access internet. In order to ensure the security of your clusters, it is recommended to limit internet output to the VPC environment, where network traffic from your other environments is regulated. We are creating the networks from each cluster's perspective and the client-controlled environment's perspective as this is a proof of concept.
 
 ```
-INTERNETGW#`aws ec2 create-internet-gateway | jq -r .InternetGateway.InternetGatewayId`
+INTERNETGW=`aws ec2 create-internet-gateway | jq -r .InternetGateway.InternetGatewayId`
 echo $INTERNETGW
-aws ec2 create-tags --resources $INTERNETGW --tags Key#Name,Value#igw-osd-neon
+aws ec2 create-tags --resources $INTERNETGW --tags Key=Name,Value=igw-osd-neon
 ```
-
-
-
-
 
 ## Attach Internet Gateway to Egress VPC
 
@@ -144,33 +140,33 @@ After created you should attach the Internet Gateway to the Egress VPC.
 aws ec2 attach-internet-gateway --vpc-id $VPC_ID_2 --internet-gateway-id $INTERNETGW
 ```
 
-!(images/6-igw.png)[Internet Gateway]
+![Internet Gateway](images/6-igw.png)
 
 ## Create Nat Gateway for Public Egress Subnet
 
 Create a public egress subnet to allow egress traffic thru the egress public subnet only. Associate an Elastic IP to guarantee
 
 ```
-ELASTICIP#`aws ec2 allocate-address --domain vpc | jq -r .AllocationId`
+ELASTICIP=`aws ec2 allocate-address --domain vpc | jq -r .AllocationId`
 echo $ELASTICIP
-NAT_GATEWAY#`aws ec2 create-nat-gateway --subnet-id $EGRESS_PUBLIC_SUBNET --allocation-id $ELASTICIP | jq -r .NatGateway.NatGatewayId`
+NAT_GATEWAY=`aws ec2 create-nat-gateway --subnet-id $EGRESS_PUBLIC_SUBNET --allocation-id $ELASTICIP | jq -r .NatGateway.NatGatewayId`
 echo $NAT_GATEWAY
-aws ec2 create-tags --resources $ELASTICIP --resources $NAT_GATEWAY --tags Key#Name,Value#egress_nat_public
+aws ec2 create-tags --resources $ELASTICIP --resources $NAT_GATEWAY --tags Key=Name,Value=egress_nat_public
 ```
 
-!(images/7-natgw.png)[Nat Gateway]
+![Nat Gateway](images/7-natgw.png)
 
 ## Create AWS Transit Gateway
 
 Create Transit GW to attach two VPCs.
 
 ```
-TRANSITGW#`aws ec2 create-transit-gateway | jq -r .TransitGateway.TransitGatewayId` 
+TRANSITGW=`aws ec2 create-transit-gateway | jq -r .TransitGateway.TransitGatewayId` 
 echo $TRANSITGW
-aws ec2 create-tags --resources $TRANSITGW --tags Key#Name,Value#osd-neon-transit-gateway
+aws ec2 create-tags --resources $TRANSITGW --tags Key=Name,Value=osd-neon-transit-gateway
 ```
 
-!(images/7-natgw.png)[Nat Gateway]
+![Nat Gateway](images/7-natgw.png)
 
 
 ### Attachment to private subnet from private CLUSTER VPC to Transit GW
@@ -178,12 +174,12 @@ aws ec2 create-tags --resources $TRANSITGW --tags Key#Name,Value#osd-neon-transi
 Transit GW starts on pending state, wait a couple o minutes until available state. After that, create a Transit GW VPC attachment on the private VPC with private subnet.
 
 ```
-TRANSITGW_A_RPV#`aws ec2 create-transit-gateway-vpc-attachment --transit-gateway-id $TRANSITGW --vpc-id $VPC_ID_1 --subnet-ids $ROSA_PRIVATE_SUBNET | jq -r .TransitGatewayVpcAttachment.TransitGatewayAttachmentId`
+TRANSITGW_A_RPV=`aws ec2 create-transit-gateway-vpc-attachment --transit-gateway-id $TRANSITGW --vpc-id $VPC_ID_1 --subnet-ids $ROSA_PRIVATE_SUBNET | jq -r .TransitGatewayVpcAttachment.TransitGatewayAttachmentId`
 echo $TRANSITGW_A_RPV
 
-aws ec2 create-tags --resources $TRANSITGW_A_RPV --tags Key#Name,Value#transit-gw-intranet-attachment
+aws ec2 create-tags --resources $TRANSITGW_A_RPV --tags Key=Name,Value=transit-gw-intranet-attachment
 ```
-!(images/9-attachment-tgw-cluster.png)[Attachment for Transit GW and Cluster VPC]
+![Attachment for Transit GW and Cluster VPC](images/9-attachment-tgw-cluster.png)
 
 
 ### Attachment to private subnet from Egress VPC to Transit GW
@@ -191,12 +187,12 @@ aws ec2 create-tags --resources $TRANSITGW_A_RPV --tags Key#Name,Value#transit-g
 Create a transit gateway
 
 ```
-TRANSITGW_A_EPV#`aws ec2 create-transit-gateway-vpc-attachment --transit-gateway-id $TRANSITGW --vpc-id $VPC_ID_2 --subnet-ids $EGRESS_PRIVATE_SUBNET | jq -r .TransitGatewayVpcAttachment.TransitGatewayAttachmentId`
+TRANSITGW_A_EPV=`aws ec2 create-transit-gateway-vpc-attachment --transit-gateway-id $TRANSITGW --vpc-id $VPC_ID_2 --subnet-ids $EGRESS_PRIVATE_SUBNET | jq -r .TransitGatewayVpcAttachment.TransitGatewayAttachmentId`
 echo $TRANSITGW_A_EPV
-aws ec2 create-tags --resources $TRANSITGW_A_EPV --tags Key#Name,Value#transit-gw-egress-attachment
+aws ec2 create-tags --resources $TRANSITGW_A_EPV --tags Key=Name,Value=transit-gw-egress-attachment
 ```
 
-!(images/10-attachment-tgw-egress.png)[Attachment for Transit GW and Egress VPC]
+![Attachment for Transit GW and Egress VPC](images/10-attachment-tgw-egress.png)
 
 
 ### Create Egress gateway route
@@ -205,13 +201,13 @@ aws ec2 create-tags --resources $TRANSITGW_A_EPV --tags Key#Name,Value#transit-g
 Discover the default transit gateway's route table ID:
 
 ```
-TRANSITGW_D_RT#`aws ec2 describe-transit-gateways --transit-gateway-id $TRANSITGW | jq -r '.TransitGateways | .[] | .Options.AssociationDefaultRouteTableId'`
+TRANSITGW_D_RT=`aws ec2 describe-transit-gateways --transit-gateway-id $TRANSITGW | jq -r '.TransitGateways | .[] | .Options.AssociationDefaultRouteTableId'`
 echo $TRANSITGW_D_RT
 
-aws ec2 create-tags --resources $TRANSITGW_D_RT --tags Key#Name,Value#transit-gw-rt
+aws ec2 create-tags --resources $TRANSITGW_D_RT --tags Key=Name,Value=transit-gw-rt
 ```
 
-!(images/11-tgw-defaultroute.png)[Transit Gw Default Route]
+![Transit Gw Default Route](images/11-tgw-defaultroute.png)
 
 
 ### Create static route for internet traffic to go to the egress VPC
@@ -220,30 +216,30 @@ aws ec2 create-tags --resources $TRANSITGW_D_RT --tags Key#Name,Value#transit-gw
 aws ec2 create-transit-gateway-route --destination-cidr-block 0.0.0.0/0 --transit-gateway-route-table-id $TRANSITGW_D_RT --transit-gateway-attachment-id $TRANSITGW_A_EPV
 
 ```
-!(images/12-egresspublic-igw-table.png)[Static Route to Egress Public Subnet for Internet Traffic]
+![Static Route to Egress Public Subnet for Internet Traffic](images/12-egresspublic-igw-table.png)
 
 
 #### Discover the main route table to private VPC
 
 ```
-ROSA_VPC_MAIN_RT#`aws ec2 describe-route-tables --filters 'Name#vpc-id,Values#'$VPC_ID_1'' --query 'RouteTables[].Associations[].RouteTableId' | jq .[] | tr -d '"'`
+ROSA_VPC_MAIN_RT=`aws ec2 describe-route-tables --filters 'Name=vpc-id,Values='$VPC_ID_1'' --query 'RouteTables[].Associations[].RouteTableId' | jq .[] | tr -d '"'`
 echo $ROSA_VPC_MAIN_RT
 
-aws ec2 create-tags --resources $ROSA_VPC_MAIN_RT --tags Key#Name,Value#rosa_main_rt 
+aws ec2 create-tags --resources $ROSA_VPC_MAIN_RT --tags Key=Name,Value=rosa_main_rt 
 ```
 
 
 #### Discover the main route table to egress VPC
 
 ```
-EGRESS_VPC_MAIN_RT#`aws ec2 describe-route-tables --filters 'Name#vpc-id,Values#'$VPC_ID_2'' --query 'RouteTables[].Associations[].RouteTableId' | jq .[] | tr -d '"'`
+EGRESS_VPC_MAIN_RT=`aws ec2 describe-route-tables --filters 'Name=vpc-id,Values='$VPC_ID_2'' --query 'RouteTables[].Associations[].RouteTableId' | jq .[] | tr -d '"'`
 echo $EGRESS_VPC_MAIN_RT
 ```
 
 ### Create a private route table in egress VPC
 
 ```
-EGRESS_PRI_RT#`aws ec2 create-route-table --vpc-id $VPC_ID_2 | jq -r .RouteTable.RouteTableId`
+EGRESS_PRI_RT=`aws ec2 create-route-table --vpc-id $VPC_ID_2 | jq -r .RouteTable.RouteTableId`
 echo $EGRESS_PRI_RT
 
 aws ec2 associate-route-table --route-table-id $EGRESS_PRI_RT --subnet-id $EGRESS_PRIVATE_SUBNET
@@ -259,7 +255,7 @@ Create a route in the egress private route table for all addresses to the NAT ga
 aws ec2 create-route --route-table-id $EGRESS_PRI_RT --destination-cidr-block 0.0.0.0/0 --gateway-id $NAT_GATEWAY 
 ```
 
-!(images/13-egresspublic-natgw-table.png)[Route table to egress private Nat Gateway]
+![Route table to egress private Nat Gateway](images/13-egresspublic-natgw-table.png)
 
 Create a route in the egress VPC's main route table for all addresses going to the internet gateway
 
@@ -291,7 +287,7 @@ In our example, I showed how to create anything from VPCs and private clusters t
 Remember that at the conclusion you will have a diagram that resembles the figure below that you will use as a reference for your documentation as well.
 
 
-!(images/full-diagram.png)[Openshift Dedicated Private Cluster with Transit Gateway]
+![Openshift Dedicated Private Cluster with Transit Gateway](images/full-diagram.png)
 
 
 
