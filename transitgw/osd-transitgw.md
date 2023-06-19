@@ -88,7 +88,7 @@ echo $VPC_ID_2
 aws ec2 create-tags --resources $VPC_ID_2 --tags Key#Name,Value#egress_vpc
 ```
 
-!(images/2-create-vpc-customerside.png)["VPC Customer AWS Subscription"]
+!["VPC Customer AWS Subscription"](images/2-create-vpc-customerside.png)
 
 
 ## Setup DNS
