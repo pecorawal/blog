@@ -33,12 +33,12 @@ So, let's start it!
 Now it's time to create the necessary objects for our private cluster.
 The following steps will be required to link your private cluster to an AWS environment using Transit Gw.
 
-. Create the Private VPC for the Cluster
-.. Create Private Subnet for the Egress VPC
-. Create Private ROSA cluster
-. Create the public VPC that will connect the cluster to the internet, we will call it Egress VPC
-. Allow DNS between vpcs
-. Create subnets and network stuff.
+1. Create the Private VPC for the Cluster
+1.1 Create Private Subnet for the Egress VPC
+2. Create Private ROSA cluster
+3. Create the public VPC that will connect the cluster to the internet, we will call it Egress VPC
+4. Allow DNS between vpcs
+5. Create subnets and network stuff.
  
 ## Create private VPC - CLUSTER VPC
 
