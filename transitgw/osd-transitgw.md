@@ -55,7 +55,7 @@ VPC_ID_1#`aws ec2 create-vpc --cidr-block 10.0.0.0/16 | jq -r .Vpc.VpcId`
 aws ec2 create-tags --resources $VPC_ID_1 --tags Key#Name,Value#rosa_intranet_vpc
 ```
 
-!(.images/1-create-private-vpc-clusterside.png))["VPC Cluster Side"]
+!(images/1-create-private-vpc-clusterside.png))["VPC Cluster Side"]
 
 
 
@@ -66,7 +66,7 @@ ROSA_PRIVATE_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_1 --cidr-block 10.0.
 aws ec2 create-tags --resources $ROSA_PRIVATE_SUBNET --tags Key#Name,Value#intranet-pvt
 echo $ROSA_PRIVATE_SUBNET
 ```
-!(.images/3-private-subnet-vpc.png)[Cluster Private Subnet]
+!(images/3-private-subnet-vpc.png)[Cluster Private Subnet]
 
 
 ## Create ROSA cluster - Single Zone
@@ -88,7 +88,7 @@ echo $VPC_ID_2
 aws ec2 create-tags --resources $VPC_ID_2 --tags Key#Name,Value#egress_vpc
 ```
 
-!(.images/2-create-vpc-customerside.png)["VPC Customer AWS Subscription"]
+!(images/2-create-vpc-customerside.png)["VPC Customer AWS Subscription"]
 
 
 ## Setup DNS
@@ -108,7 +108,7 @@ EGRESS_PRIVATE_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172
 aws ec2 create-tags --resources $EGRESS_PRIVATE_SUBNET --tags Key#Name,Value#egress-pvt
 echo $EGRESS_PRIVATE_SUBNET
 ```
-!(.images/4-private-subnet-Egressvpc.png)[Egress VPC - Private Subnet]
+!(images/4-private-subnet-Egressvpc.png)[Egress VPC - Private Subnet]
 
 
 ## Public Subnet for Egress VPC
@@ -118,7 +118,7 @@ EGRESS_PUBLIC_SUBNET#`aws ec2 create-subnet --vpc-id $VPC_ID_2 --cidr-block 172.
 aws ec2 create-tags --resources $EGRESS_PUBLIC_SUBNET --tags Key#Name,Value#egress-public
 echo $EGRESS_PUBLIC_SUBNET
 ```
-!(.images/5-public-subnet-Egressvpc.png)[Egress VPC - Public Subnet]
+!(images/5-public-subnet-Egressvpc.png)[Egress VPC - Public Subnet]
 
 
 
@@ -144,7 +144,7 @@ After created you should attach the Internet Gateway to the Egress VPC.
 aws ec2 attach-internet-gateway --vpc-id $VPC_ID_2 --internet-gateway-id $INTERNETGW
 ```
 
-!(.images/6-igw.png)[Internet Gateway]
+!(images/6-igw.png)[Internet Gateway]
 
 ## Create Nat Gateway for Public Egress Subnet
 
@@ -158,7 +158,7 @@ echo $NAT_GATEWAY
 aws ec2 create-tags --resources $ELASTICIP --resources $NAT_GATEWAY --tags Key#Name,Value#egress_nat_public
 ```
 
-!(.images/7-natgw.png)[Nat Gateway]
+!(images/7-natgw.png)[Nat Gateway]
 
 ## Create AWS Transit Gateway
 
@@ -170,7 +170,7 @@ echo $TRANSITGW
 aws ec2 create-tags --resources $TRANSITGW --tags Key#Name,Value#osd-neon-transit-gateway
 ```
 
-!(.images/7-natgw.png)[Nat Gateway]
+!(images/7-natgw.png)[Nat Gateway]
 
 
 ### Attachment to private subnet from private CLUSTER VPC to Transit GW
@@ -183,7 +183,7 @@ echo $TRANSITGW_A_RPV
 
 aws ec2 create-tags --resources $TRANSITGW_A_RPV --tags Key#Name,Value#transit-gw-intranet-attachment
 ```
-!(.images/9-attachment-tgw-cluster.png)[Attachment for Transit GW and Cluster VPC]
+!(images/9-attachment-tgw-cluster.png)[Attachment for Transit GW and Cluster VPC]
 
 
 ### Attachment to private subnet from Egress VPC to Transit GW
@@ -196,7 +196,7 @@ echo $TRANSITGW_A_EPV
 aws ec2 create-tags --resources $TRANSITGW_A_EPV --tags Key#Name,Value#transit-gw-egress-attachment
 ```
 
-!(.images/10-attachment-tgw-egress.png)[Attachment for Transit GW and Egress VPC]
+!(images/10-attachment-tgw-egress.png)[Attachment for Transit GW and Egress VPC]
 
 
 ### Create Egress gateway route
@@ -211,7 +211,7 @@ echo $TRANSITGW_D_RT
 aws ec2 create-tags --resources $TRANSITGW_D_RT --tags Key#Name,Value#transit-gw-rt
 ```
 
-!(.images/11-tgw-defaultroute.png)[Transit Gw Default Route]
+!(images/11-tgw-defaultroute.png)[Transit Gw Default Route]
 
 
 ### Create static route for internet traffic to go to the egress VPC
@@ -220,7 +220,7 @@ aws ec2 create-tags --resources $TRANSITGW_D_RT --tags Key#Name,Value#transit-gw
 aws ec2 create-transit-gateway-route --destination-cidr-block 0.0.0.0/0 --transit-gateway-route-table-id $TRANSITGW_D_RT --transit-gateway-attachment-id $TRANSITGW_A_EPV
 
 ```
-!(.images/12-egresspublic-igw-table.png)[Static Route to Egress Public Subnet for Internet Traffic]
+!(images/12-egresspublic-igw-table.png)[Static Route to Egress Public Subnet for Internet Traffic]
 
 
 #### Discover the main route table to private VPC
@@ -259,7 +259,7 @@ Create a route in the egress private route table for all addresses to the NAT ga
 aws ec2 create-route --route-table-id $EGRESS_PRI_RT --destination-cidr-block 0.0.0.0/0 --gateway-id $NAT_GATEWAY 
 ```
 
-!(.images/13-egresspublic-natgw-table.png)[Route table to egress private Nat Gateway]
+!(images/13-egresspublic-natgw-table.png)[Route table to egress private Nat Gateway]
 
 Create a route in the egress VPC's main route table for all addresses going to the internet gateway
 
@@ -291,7 +291,7 @@ In our example, I showed how to create anything from VPCs and private clusters t
 Remember that at the conclusion you will have a diagram that resembles the figure below that you will use as a reference for your documentation as well.
 
 
-!(.images/full-diagram.png)[Openshift Dedicated Private Cluster with Transit Gateway]
+!(images/full-diagram.png)[Openshift Dedicated Private Cluster with Transit Gateway]
 
 
 
