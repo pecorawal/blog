@@ -129,7 +129,7 @@ Internet Gateway is the AWS object responsible to create a way to VPC access int
 ```
 INTERNETGW=`aws ec2 create-internet-gateway | jq -r .InternetGateway.InternetGatewayId`
 echo $INTERNETGW
-aws ec2 create-tags --resources $INTERNETGW --tags Key=Name,Value=igw-osd-neon
+aws ec2 create-tags --resources $INTERNETGW --tags Key=Name,Value=igw-rosa
 ```
 
 ## Attach Internet Gateway to Egress VPC
@@ -163,7 +163,7 @@ Create Transit GW to attach two VPCs.
 ```
 TRANSITGW=`aws ec2 create-transit-gateway | jq -r .TransitGateway.TransitGatewayId` 
 echo $TRANSITGW
-aws ec2 create-tags --resources $TRANSITGW --tags Key=Name,Value=osd-neon-transit-gateway
+aws ec2 create-tags --resources $TRANSITGW --tags Key=Name,Value=rosa-transit-gateway
 ```
 
 ![Nat Gateway](images/7-natgw.png)
