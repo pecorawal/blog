@@ -35,7 +35,7 @@ The following steps will be required to link your private cluster to an AWS envi
 2. Create Private ROSA cluster
 3. Create the public VPC that will connect the cluster to the internet, we will call it Egress VPC
 4. Allow DNS between vpcs
-5. Create subnets and network stuff.
+5. Create subnets and extra resources.
  
 ## Create private VPC - CLUSTER VPC
 
