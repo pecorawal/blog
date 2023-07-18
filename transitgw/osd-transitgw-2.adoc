@@ -1,7 +1,7 @@
 :imagesdir: images
 
 
-= Protect your ROSA cluster with Openshift Dedicated and Transit Gw 
+= Protect your ROSA cluster with Transit Gw 
 
 
 A systems administrator must make numerous choices on the infrastructure environment that underlies the applications supported by a company. Undoubtedly, one of the most challenging issues is having to choose between staying in a traditional environment and moving to the cloud, regardless of the cloud provider.
